@@ -1732,7 +1732,7 @@ pub unsafe fn init_dram(para: &mut dram_parameters) -> usize {
         sdelay(20);
         if VERBOSE {
             let zq_val = readl(ZQ_VALUE);
-            println!("ZQ: 0x{:x}", zq_val);
+            println!("ZQ: 0x{:?}", zq_val);
         }
     }
 
@@ -1772,7 +1772,7 @@ pub unsafe fn init_dram(para: &mut dram_parameters) -> usize {
         if (para.dram_odt_en & 0x1) == 0 {
             println!("ODT off");
         } else {
-            println!("ZQ: 0x{:x}", para.dram_zq);
+            println!("ZQ: 0x{:?}", para.dram_zq);
         }
     }
 
@@ -1781,7 +1781,7 @@ pub unsafe fn init_dram(para: &mut dram_parameters) -> usize {
         if (para.dram_mr1 & 0x44) == 0 {
             println!("ODT off");
         } else {
-            println!("ODT: 0x{:x}", para.dram_mr1);
+            println!("ODT: 0x{:?}", para.dram_mr1);
         }
     }
 
@@ -1858,7 +1858,7 @@ pub unsafe fn init_dram(para: &mut dram_parameters) -> usize {
             println!("test fail {}", msg);
             return 0;
         }
-        println!("test OK");
+        println!("test OK   😜 ");
     }
 
     handler_super_standby();
@@ -1867,6 +1867,6 @@ pub unsafe fn init_dram(para: &mut dram_parameters) -> usize {
 }
 
 pub fn init() -> usize {
-    // println!("DRAM INIT");
+    println!("DRAM INIT");
     return unsafe { init_dram(&mut DRAM_PARA) };
 }

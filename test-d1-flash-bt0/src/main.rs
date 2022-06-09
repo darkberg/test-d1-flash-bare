@@ -180,7 +180,7 @@ extern "C" fn main() {
     let serial = Serial::new(p.UART0, (tx, rx), config, &clocks);
     crate::logging::set_logger(serial);
 
-    println!("oreboot 🦀");
+    println!("oreboot 🦀 🕹️🕹️🕹️🕹️ 🔋 🏁🏁🏁🏁");
 
     let ram_size = mctl::init();
     println!("{}M 🐏", ram_size);
@@ -197,7 +197,7 @@ extern "C" fn main() {
     // e.g., GigaDevice (GD) is 0xC8 and GD25Q128 is 0x4018
     // see flashrom/flashchips.h for details and more
     let id = flash.read_id();
-    println!("SPI flash vendor {:x} part {:x}{:x}\n", id[0], id[1], id[2],);
+    println!("SPI flash vendor 🏭 {:?} part 🍚 {:?} {:?}\n", id[0], id[1], id[2],);
 
     // 32K, the size of boot0
     let base = 0x1 << 15;
@@ -212,7 +212,8 @@ extern "C" fn main() {
         let rval = unsafe { read_volatile(addr as *mut u32) };
 
         if rval != val {
-            println!("MISMATCH {addr} r{:08x} :: {:08x}", rval, val);
+            println!("MISMATCH  r 🦀");
+            //{:08?} :: {:08?}", rval, val);
         }
         /*
         if i < 10 || i == 256 {
@@ -223,7 +224,7 @@ extern "C" fn main() {
   
     // let mut flash = SpiNand::new(spi);
 
-    // println!("Oreboot read flash ID = {:?}", flash.read_id()).ok();
+    println!("Oreboot read flash ID = {:?}", flash.read_id()).ok();
 
     // let mut page = [0u8; 256];
     // flash.copy_into(0, &mut page);
@@ -237,16 +238,18 @@ extern "C" fn main() {
         }
     }
     let addr = RAM_BASE;
-    println!("Run payload at {:#x}", addr);
+    println!("Run payload at {:#?}", addr);
     unsafe {
         let f: unsafe extern "C" fn() = transmute(addr);
-        f();
+        println!("💓");
+        //f();
         // let f = transmute::<usize, EntryPoint>(addr);
         // f(0, 0);
+        println!("☢️💓☢️");
     }
   
-    // println!("OREBOOT").ok();
-    // println!("Test succeeded! 🦀").ok();
+    println!("OREBOOT").ok();
+    println!("Test succeeded! 🦀").ok();
 }
 
 // should jump to dram but not reach there
