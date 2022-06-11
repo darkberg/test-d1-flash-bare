@@ -156,11 +156,22 @@ $(#[allow(unused)] pub mod $portx {
 
 define_gpio! {
     PortB, portb, 'B', [
+        PB0: (pb0, 0, Disabled), ("PB0", "J16"), ("PWM3", "IR-TX", "TWI2-SCK", "SPI1-WP/DBI-TE", "UART0-TX", "UART2-TX", "OWA-OUT"),        
+        PB1: (pb1, 1, Disabled), ("PB1", "J17"), ("PWM4", "I2S2-DOUT3", "TWI2-SDA", "I2S-DIN3", "UART0-RX", "UART2-RX", "IR-XA"),
+        PB2: (pb2, 2, Disabled), ("PB2", "M16"), ("LCD0-D0", "I2S2-DOUT2", "TWI0-SDA","I2S2-DIN2", "LCD0-D18", "UART4-TX",x),          
+        PB3: (pb3, 3, Disabled), ("PB3", "M15"), ("LCD0-D1", "I2S2-DOUT1", "TWI0-SCK", "I2S2-DIN0", "LCD0-D19", "UART4-RX",x),
+        PB4: (pb4, 4, Disabled), ("PB4", "K16"), ("LCD0-D8", "I2S2-DOUT0", "TWI1-SCK", "I2S2-DIN1", "LCD0-D20", "UART5-TX",x),
         PB5: (pb5, 5, Disabled), ("PB5", "K15"), ("LCD0-D9", "I2S2-BCLK", "TWI1-SDA", "PWM0", "LCD0-D21", "UART5-RX", x),
+        PB6: (pb6, 6, Disabled), ("PB6", "K17"), ("LCD0-D16", "I2S2-LRCK", "TWI3-SCK", "PWM1", "LCD0-D22", "UART3-TX", "CPUBIST0"),
+        PB7: (pb7, 7, Disabled), ("PB7", "J15"), ("LCD0-D17", "I2S2-MCLK", "TWI3-SDA", "IR-RX", "LCD0-D23", "UART3-RX", "CPUBIST1"),
         PB8: (pb8, 8, Disabled), ("PB8", "G15"), ("DMIC-DATA3", "PWM5", "TWI2-SCK", "SPI1-HOLD/DBI-DCX/DBI-WRX", "UART0-TX", "UART1-TX", x),
         PB9: (pb9, 9, Disabled), ("PB9", "G16"), ("DMIC-DATA2", "PWM6", "TWI2-SDA", "SPI1-MISO/DBI-SDI/DBI-TE/DBI-DCX", "UART0-RX", "UART1-RX", x),
+        PB10: (pb10, 10, Disabled), ("PB10", "F17"), ("DMIC-DATA1","PWM7", "TWI0-SCK", "SPI1-MOSI", "DBI-SDO", "CLK-FANOUT0", "UART1-RTS"),
+        PB11: (pb11, 11, Disabled), ("PB11", "F15"), ("DMIC-DATA0", "PWM2", "TWI0-SDA", "SPI1-CLK", "DBI-SCLK", "CLK-FANOUT1", "UART1-CTS"),
+        PB12: (pb12, 12, Disabled), ("PB12", "F16"), ("DMIC-CLK", "PWM0", "SPDIF-IN", "SPI1-CS", "DBI-CSX", "CLK-FANOUT2", "IR-RX"),
     ]
     PortC, portc, 'C', [
+        PC0: (pc0, 0, Disabled), ("PC0", "F2"), ("UART2-TX", "TWI2-SCK", "LEDC-D0", x, x, x, x),
         PC1: (pc1, 1, Disabled), ("PC1", "F1"), ("UART2-RX", "TWI2-SDA", x, x, x, x, x),
         PC2: (pc2, 2, Disabled), ("PC2", "G3"), ("SPI0-CLK", "SDC2-CLK", x, x, x, x, x),
         PC3: (pc3, 3, Disabled), ("PC3", "G2"), ("SPI0-CS0", "SDC2-CMD", x, x, x, x, x),
@@ -172,8 +183,11 @@ define_gpio! {
     PortF, portf, 'F', [
         PF0: (pf0, 0, Disabled), ("PF0", "C2"), ("SDC0-D1", "JTAG-MS", "R-JTAG-MS", "I2S2-DOUT1", "I2S2-DIN0", x, x),
         PF1: (pf1, 1, Disabled), ("PF1", "C1"), ("SDC0-D0", "JTAG-DI", "R-JTAG-DI", "I2S2-DOUT0", "I2S2-DIN1", x, x),
+        PF2: (pf2, 2, Disabled), ("PF2", "D2"), ("SDC0-CLK", "UART0-TX", "TWI0-SCK", "LEDC-DO", "SPDIF-IN", x, x),
         PF3: (pf3, 3, Disabled), ("PF3", "D1"), ("SDC0-CMD", "JTAG-DO", "R-JTAG-DO", "I2S2-BCLK", x, x, x),
+        PF4: (pf4, 4, Disabled), ("PF4", "E3"), ("SDC0-D3", "UART0-RX", "TWI0-SDA", "PWM6", "IR-TX", x, x),
         PF5: (pf5, 5, Disabled), ("PF5", "E2"), ("SDC0-D2", "JTAG-CK", "R-JTAG-CK", "I2S2-LRCK", x, x, x),
+        PF6: (pf6, 6, Disabled), ("PF6", "D3"), ("SPDIF-OUT", "IR-RX", "I2S2-MCLK", "PWM5", x, x, x),
     ]
 }
 

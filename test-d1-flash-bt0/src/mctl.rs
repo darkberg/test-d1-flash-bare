@@ -1858,7 +1858,7 @@ pub unsafe fn init_dram(para: &mut dram_parameters) -> usize {
             println!("test fail {}", msg);
             return 0;
         }
-        println!("test OK   😜 ");
+        println!("DRAM test OK   😜 ");
     }
 
     handler_super_standby();

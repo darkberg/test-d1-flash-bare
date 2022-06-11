@@ -168,6 +168,16 @@ extern "C" fn main() {
     val = pc_dat0 | 0b1 << 1;
     unsafe { write_volatile(GPIO_PC_DATA as *mut u32, val) };
 
+    //enable PB1 & PB0 on external pins
+    // light up led
+    let mut pb0 = gpio.portb.pb0.into_output();
+    pb0.set_high().unwrap();
+    let mut pb1 = gpio.portb.pb1.into_output();
+
+    pb1.set_high().unwrap();    
+
+
+
     // prepare serial port logger
     let tx = gpio.portb.pb8.into_function_6();
     let rx = gpio.portb.pb9.into_function_6();
@@ -234,7 +244,9 @@ extern "C" fn main() {
 
     unsafe {
         for _ in 0..10_000_000 {
-            core::arch::asm!("nop")
+            //println!("💓");
+            core::arch::asm!("nop");
+            //println!("☢️💓☢️");
         }
     }
     let addr = RAM_BASE;
@@ -250,6 +262,45 @@ extern "C" fn main() {
   
     println!("OREBOOT").ok();
     println!("Test succeeded! 🦀").ok();
+    // light up led
+    //let mut pb5 = gpio.portb.pb5.into_output();
+    
+    unsafe {
+        for _ in 0..10_000_000 {
+            //println!("💓");
+            pb0.set_high().unwrap();
+            core::arch::asm!("nop");
+            println!("☢️");
+            pb1.set_low().unwrap();
+            core::arch::asm!("nop");
+            core::arch::asm!("nop");
+            core::arch::asm!("nop");
+            core::arch::asm!("nop");
+            core::arch::asm!("nop");
+            core::arch::asm!("nop");                    
+            core::arch::asm!("nop");
+            core::arch::asm!("nop");
+            core::arch::asm!("nop");
+            core::arch::asm!("nop");
+            pb0.set_low().unwrap();
+            core::arch::asm!("nop");            
+            core::arch::asm!("nop");
+            core::arch::asm!("nop");
+            core::arch::asm!("nop");
+            core::arch::asm!("nop");
+            core::arch::asm!("nop");
+            core::arch::asm!("nop");            
+            core::arch::asm!("nop");
+            core::arch::asm!("nop");
+            core::arch::asm!("nop");
+            core::arch::asm!("nop");
+            pb1.set_high().unwrap();
+            core::arch::asm!("nop");
+            core::arch::asm!("nop");
+        }
+    }   
+    //pb5.set_low().unwrap();
+
 }
 
 // should jump to dram but not reach there

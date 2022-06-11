@@ -9,6 +9,50 @@ more output to help debugging.
 
 Prerequisites: you need to install Rust and build target `riscv64imac-unknown-none-elf`.
 
+
+Installing the Rust Compiler Target
+The compilation target for this device is officially supported via the NIGHTLY release channel and can be installed via rustup:
+
+$ rustup show   
+
+```
+will output the available toolchains & targets ::
+
+λ rustup show
+
+Default host: x86_64-unknown-linux-gnu
+rustup home:  /home/d/.rustup
+
+installed toolchains
+--------------------
+
+stable-x86_64-unknown-linux-gnu
+nightly-x86_64-unknown-linux-gnu (default)
+
+installed targets for active toolchain
+--------------------------------------
+
+riscv64imac-unknown-none-elf
+x86_64-unknown-linux-gnu
+
+active toolchain
+----------------
+
+nightly-x86_64-unknown-linux-gnu (default)
+rustc 1.63.0-nightly (5435ed691 2022-06-07)
+```
+
+$ rustup default nightly
+
+```
+eventually, if needed, one can add the following component: llvm-tools-preview
+
+$ rustup component add llvm-tools-preview
+
+```
+
+$ rustup target add riscv32imc-unknown-none-elf
+
 Use following command:
 
 ```
