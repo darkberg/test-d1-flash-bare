@@ -9,11 +9,20 @@ more output to help debugging.
 
 Prerequisites: you need to install Rust and build target `riscv64imac-unknown-none-elf`.
 
+$ sudo apt install libusb-1.0-0-dev
+$ git clone https://github.com/xboot/xfel [dest_dir]
+
+$ cd xfel
+$ make
+$ sudo make install
+
 
 Installing the Rust Compiler Target
 The compilation target for this device is officially supported via the NIGHTLY release channel and can be installed via rustup:
 
 $ rustup show   
+
+
 
 ```
 will output the available toolchains & targets ::
@@ -22,6 +31,8 @@ will output the available toolchains & targets ::
 
 Default host: x86_64-unknown-linux-gnu
 rustup home:  /home/d/.rustup
+
+rustup install nightly-x86_64-unknown-linux-gnu
 
 installed toolchains
 --------------------

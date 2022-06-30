@@ -10,6 +10,7 @@ use core::ptr::{read_volatile, write_volatile};
 use core::{arch::asm, panic::PanicInfo};
 use d1_pac::Peripherals;
 use embedded_hal::digital::{blocking::OutputPin, PinState};
+//use std::io;
 
 #[macro_use]
 mod logging;
@@ -37,11 +38,122 @@ pub type EntryPoint = unsafe extern "C" fn(r0: usize, r1: usize);
 const STACK_SIZE: usize = 1 * 1024; // 1KiB
 
 const GPIO_BASE_ADDR: u32 = 0x0200_0000;
+const PWM_BASE_ADDR: u32 = 0x0200_0C00; //PWM Base Address
+
+const GPIO_PB_CFG0: u32 = GPIO_BASE_ADDR + 0x0030;//PB Configure Reg 0
+const GPIO_PB_CFG1: u32 = GPIO_BASE_ADDR + 0x0034;//PB Configure Reg 1
+const GPIO_PB_DATA:  u32 = GPIO_BASE_ADDR + 0x0040;//PB Data Reg 
+const GPIO_PB_DRV0: u32 = GPIO_BASE_ADDR + 0x0044;//PB Multi Driving Reg 0
+const GPIO_PB_DRV1: u32 = GPIO_BASE_ADDR + 0x0048;//PB Multi Driving Reg 1
+const GPIO_PB_PULL0:u32 = GPIO_BASE_ADDR + 0x0054;//PB Pull Reg 0
+
 const GPIO_PC_CFG0: u32 = GPIO_BASE_ADDR + 0x0060;
 const GPIO_PC_DATA: u32 = GPIO_BASE_ADDR + 0x0070;
 
+const GPIO_PB_EINT_CFG0: u32 = GPIO_BASE_ADDR + 0x0220;//PB External Interrupt Configure Register 0
+
+const GPIO_PB_EINT_CTL:    u32 = GPIO_BASE_ADDR + 0x0230;//PB External Interrupt Control Register
+const GPIO_PB_EINT_STATUS: u32 = GPIO_BASE_ADDR + 0x0234;//PB External Interrupt Status Register
+const GPIO_PB_EINT_DEB:    u32 = GPIO_BASE_ADDR + 0x0238;//PB External Interrupt Debounce Register
+
 #[link_section = ".bss.uninit"]
 static mut SBI_STACK: [u8; STACK_SIZE] = [0; STACK_SIZE];
+
+
+//PWM Registers list
+const PWM_PIER_ADDR: u32=PWM_BASE_ADDR + 0x0000;//PWM IRQ Enable Register
+const PWM_PISR_ADDR: u32=PWM_BASE_ADDR + 0x0004;//PWM IRQ Status Register
+const PWM_CIER_ADDR: u32=PWM_BASE_ADDR + 0x0010;//Capture IRQ Enable Register
+const PWM_CISR_ADDR: u32=PWM_BASE_ADDR + 0x0014;//Capture IRQ Status Register
+const PWM_PCCR01_ADDR: u32=PWM_BASE_ADDR + 0x0020;//PWM01 Clock Configuration Register
+const PWM_PCCR23_ADDR: u32=PWM_BASE_ADDR + 0x0024;//PWM23 Clock Configuration Register
+const PWM_PCCR45_ADDR: u32=PWM_BASE_ADDR + 0x0028;//PWM45 Clock Configuration Register
+const PWM_PCCR67_ADDR: u32=PWM_BASE_ADDR + 0x002C;//PWM67 Clock Configuration Register
+
+const PWM_PCGR_ADDR: u32=PWM_BASE_ADDR + 0x0040;//PWM Clock Gating Register
+const PWM_PDZCR01_ADDR: u32=PWM_BASE_ADDR + 0x0060;//PWM01 Dead Zone Control Register
+const PWM_PDZCR23_ADDR: u32=PWM_BASE_ADDR + 0x0064;//PWM23 Dead Zone Control Register
+const PWM_PDZCR45_ADDR: u32=PWM_BASE_ADDR + 0x0068;//PWM45 Dead Zone Control Register
+const PWM_PDZCR67_ADDR: u32=PWM_BASE_ADDR + 0x006C;//PWM67 Dead Zone Control Register
+
+const PWM_PER_ADDR: u32=PWM_BASE_ADDR + 0x0080;//PWM Enable Register
+const PWM_PGR0_ADDR: u32=PWM_BASE_ADDR + 0x0090;//PWM Group0 Register
+const PWM_PGR1_ADDR: u32=PWM_BASE_ADDR + 0x0094;//PWM Group1 Register
+const PWM_PGR2_ADDR: u32=PWM_BASE_ADDR + 0x0098;//PWM Group2 Register
+const PWM_PGR3_ADDR: u32=PWM_BASE_ADDR + 0x009C;//PWM Group3 Register
+
+
+const PWM_CER_ADDR: u32=PWM_BASE_ADDR + 0x00C0;//Capture Enable Register
+
+const PWM_PCR0_ADDR: u32=PWM_BASE_ADDR +0x0100+0x0000+0*0x0020;//PWM0 Control Register
+const PWM_PCR1_ADDR: u32=PWM_BASE_ADDR +0x0100+0x0000+1*0x0020;//PWM1 Control Register
+const PWM_PCR2_ADDR: u32=PWM_BASE_ADDR +0x0100+0x0000+2*0x0020;//PWM2 Control Register
+const PWM_PCR3_ADDR: u32=PWM_BASE_ADDR +0x0100+0x0000+3*0x0020;//PWM3 Control Register
+const PWM_PCR4_ADDR: u32=PWM_BASE_ADDR +0x0100+0x0000+4*0x0020;//PWM4 Control Register
+const PWM_PCR5_ADDR: u32=PWM_BASE_ADDR +0x0100+0x0000+5*0x0020;//PWM5 Control Register
+const PWM_PCR6_ADDR: u32=PWM_BASE_ADDR +0x0100+0x0000+6*0x0020;//PWM6 Control Register
+const PWM_PCR7_ADDR: u32=PWM_BASE_ADDR +0x0100+0x0000+7*0x0020;//PWM7 Control Register
+
+const PWM_PPR0_ADDR: u32=PWM_BASE_ADDR +0x0100+0x0004+0*0x0020;//PWM0 Period Register
+const PWM_PPR1_ADDR: u32=PWM_BASE_ADDR +0x0100+0x0004+1*0x0020;//PWM1 Period Register
+const PWM_PPR2_ADDR: u32=PWM_BASE_ADDR +0x0100+0x0004+2*0x0020;//PWM2 Period Register
+const PWM_PPR3_ADDR: u32=PWM_BASE_ADDR +0x0100+0x0004+3*0x0020;//PWM3 Period Register
+const PWM_PPR4_ADDR: u32=PWM_BASE_ADDR +0x0100+0x0004+4*0x0020;//PWM4 Period Register
+const PWM_PPR5_ADDR: u32=PWM_BASE_ADDR +0x0100+0x0004+5*0x0020;//PWM5 Period Register
+const PWM_PPR6_ADDR: u32=PWM_BASE_ADDR +0x0100+0x0004+6*0x0020;//PWM6 Period Register
+const PWM_PPR7_ADDR: u32=PWM_BASE_ADDR +0x0100+0x0004+7*0x0020;//PWM7 Period Register
+
+const PWM_PCNTR0_ADDR: u32=PWM_BASE_ADDR +0x0100+0x0008+0*0x0020;//PWM0 Count Register
+const PWM_PCNTR1_ADDR: u32=PWM_BASE_ADDR +0x0100+0x0008+1*0x0020;//PWM1 Count Register
+const PWM_PCNTR2_ADDR: u32=PWM_BASE_ADDR +0x0100+0x0008+2*0x0020;//PWM2 Count Register
+const PWM_PCNTR3_ADDR: u32=PWM_BASE_ADDR +0x0100+0x0008+3*0x0020;//PWM3 Count Register
+const PWM_PCNTR4_ADDR: u32=PWM_BASE_ADDR +0x0100+0x0008+4*0x0020;//PWM4 Count Register
+const PWM_PCNTR5_ADDR: u32=PWM_BASE_ADDR +0x0100+0x0008+5*0x0020;//PWM5 Count Register
+const PWM_PCNTR6_ADDR: u32=PWM_BASE_ADDR +0x0100+0x0008+6*0x0020;//PWM6 Count Register
+const PWM_PCNTR7_ADDR: u32=PWM_BASE_ADDR +0x0100+0x0008+7*0x0020;//PWM7 Count Register
+
+
+const PWM_PPCNTR0_ADDR: u32=PWM_BASE_ADDR +0x0100+0x000C+0*0x0020;//PWM0 Pulse Count Register
+const PWM_PPCNTR1_ADDR: u32=PWM_BASE_ADDR +0x0100+0x000C+1*0x0020;//PWM1 Pulse Count Register
+const PWM_PPCNTR2_ADDR: u32=PWM_BASE_ADDR +0x0100+0x000C+2*0x0020;//PWM2 Pulse Count Register
+const PWM_PPCNTR3_ADDR: u32=PWM_BASE_ADDR +0x0100+0x000C+3*0x0020;//PWM3 Pulse Count Register
+const PWM_PPCNTR4_ADDR: u32=PWM_BASE_ADDR +0x0100+0x000C+4*0x0020;//PWM4 Pulse Count Register
+const PWM_PPCNTR5_ADDR: u32=PWM_BASE_ADDR +0x0100+0x000C+5*0x0020;//PWM5 Pulse Count Register
+const PWM_PPCNTR6_ADDR: u32=PWM_BASE_ADDR +0x0100+0x000C+6*0x0020;//PWM6 Pulse Count Register
+const PWM_PPCNTR7_ADDR: u32=PWM_BASE_ADDR +0x0100+0x000C+7*0x0020;//PWM7 Pulse Count Register
+
+
+const PWM_CCR0_ADDR: u32=PWM_BASE_ADDR +0x0100+0x0010+0*0x0020;//Capture0 Control Register
+const PWM_CCR1_ADDR: u32=PWM_BASE_ADDR +0x0100+0x0010+1*0x0020;//Capture1 Control Register
+const PWM_CCR2_ADDR: u32=PWM_BASE_ADDR +0x0100+0x0010+2*0x0020;//Capture2 Control Register
+const PWM_CCR3_ADDR: u32=PWM_BASE_ADDR +0x0100+0x0010+3*0x0020;//Capture3 Control Register
+const PWM_CCR4_ADDR: u32=PWM_BASE_ADDR +0x0100+0x0010+4*0x0020;//Capture4 Control Register
+const PWM_CCR5_ADDR: u32=PWM_BASE_ADDR +0x0100+0x0010+5*0x0020;//Capture5 Control Register
+const PWM_CCR6_ADDR: u32=PWM_BASE_ADDR +0x0100+0x0010+6*0x0020;//Capture6 Control Register
+const PWM_CCR7_ADDR: u32=PWM_BASE_ADDR +0x0100+0x0010+7*0x0020;//Capture7 Control Register
+
+const PWM_CRLR0_ADDR: u32=PWM_BASE_ADDR +0x0100+0x0014+0*0x0020;//Capture0 Rise Lock Register
+const PWM_CRLR1_ADDR: u32=PWM_BASE_ADDR +0x0100+0x0014+1*0x0020;//Capture1 Rise Lock Register
+const PWM_CRLR2_ADDR: u32=PWM_BASE_ADDR +0x0100+0x0014+2*0x0020;//Capture2 Rise Lock Register
+const PWM_CRLR3_ADDR: u32=PWM_BASE_ADDR +0x0100+0x0014+3*0x0020;//Capture3 Rise Lock Register
+const PWM_CRLR4_ADDR: u32=PWM_BASE_ADDR +0x0100+0x0014+4*0x0020;//Capture4 Rise Lock Register
+const PWM_CRLR5_ADDR: u32=PWM_BASE_ADDR +0x0100+0x0014+5*0x0020;//Capture5 Rise Lock Register
+const PWM_CRLR6_ADDR: u32=PWM_BASE_ADDR +0x0100+0x0014+6*0x0020;//Capture6 Rise Lock Register
+const PWM_CRLR7_ADDR: u32=PWM_BASE_ADDR +0x0100+0x0014+7*0x0020;//Capture7 Rise Lock Register
+
+const PWM_CFLR0_ADDR: u32=PWM_BASE_ADDR +0x0100+0x0018+0*0x0020;//Capture0 Fall Lock Register
+const PWM_CFLR1_ADDR: u32=PWM_BASE_ADDR +0x0100+0x0018+1*0x0020;//Capture1 Fall Lock Register
+const PWM_CFLR2_ADDR: u32=PWM_BASE_ADDR +0x0100+0x0018+2*0x0020;//Capture2 Fall Lock Register
+const PWM_CFLR3_ADDR: u32=PWM_BASE_ADDR +0x0100+0x0018+3*0x0020;//Capture3 Fall Lock Register
+const PWM_CFLR4_ADDR: u32=PWM_BASE_ADDR +0x0100+0x0018+4*0x0020;//Capture4 Fall Lock Register
+const PWM_CFLR5_ADDR: u32=PWM_BASE_ADDR +0x0100+0x0018+5*0x0020;//Capture5 Fall Lock Register
+const PWM_CFLR6_ADDR: u32=PWM_BASE_ADDR +0x0100+0x0018+6*0x0020;//Capture6 Fall Lock Register
+const PWM_CFLR7_ADDR: u32=PWM_BASE_ADDR +0x0100+0x0018+7*0x0020;//Capture7 Fall Lock Register
+
+
+
+
+//End Pwm registers list
 
 /// Jump over head data to executable code.
 ///
@@ -176,7 +288,30 @@ extern "C" fn main() {
 
     pb1.set_high().unwrap();    
 
+//first try for PortB , PB0 & PB1
 
+    // Change into output mode pins from PortB
+    let pb_cfg0 = unsafe { read_volatile(GPIO_PB_CFG0 as *const u32) };
+    let mut val = pb_cfg0 & 0xffffff00 | 0x11;//0x11; //0x11 = pb0&1 as outputs // 0x22 = pb0&1 as pwm3 & pwm4
+    unsafe { write_volatile(GPIO_PB_CFG0 as *mut u32, val) };
+    // Set pins to HIGH
+    let pb_dat0 = unsafe { read_volatile(GPIO_PB_DATA as *const u32) };
+    val = pb_dat0 | 0b11;
+    unsafe { write_volatile(GPIO_PB_DATA as *mut u32, val) };
+
+    //0x0238 PB External Interrupt Debounce Register (Default Value: 0x0000_0000)
+    //GPIO_PB_EINT_DEB
+    let mut pb_EINT_DEB0 = unsafe { read_volatile(GPIO_PB_EINT_DEB as *const u32) };
+    //println!("M mmmm");//, pb_EINT_DEB0).ok();
+
+
+//The timer logic module of PWM consists of one 16-bit up-counter (PCNTR) and three 16-bit parameters
+//(PWM_ENTIRE_CYCLE, PWM_ACT_CYCLE, PWM_COUNTER_START). The PWM_ENTIRE_CYCLE is used to
+//
+
+//END first try for PortB , PB0 & PB1
+/////////////////////////////////////
+/// 
 
     // prepare serial port logger
     let tx = gpio.portb.pb8.into_function_6();
@@ -266,40 +401,27 @@ extern "C" fn main() {
     //let mut pb5 = gpio.portb.pb5.into_output();
     
     unsafe {
-        for _ in 0..10_000_000 {
-            //println!("💓");
+        for _ in 0..1_000_000 {
             pb0.set_high().unwrap();
-            core::arch::asm!("nop");
-            println!("☢️");
-            pb1.set_low().unwrap();
-            core::arch::asm!("nop");
-            core::arch::asm!("nop");
-            core::arch::asm!("nop");
-            core::arch::asm!("nop");
-            core::arch::asm!("nop");
-            core::arch::asm!("nop");                    
-            core::arch::asm!("nop");
-            core::arch::asm!("nop");
-            core::arch::asm!("nop");
-            core::arch::asm!("nop");
-            pb0.set_low().unwrap();
-            core::arch::asm!("nop");            
-            core::arch::asm!("nop");
-            core::arch::asm!("nop");
-            core::arch::asm!("nop");
-            core::arch::asm!("nop");
-            core::arch::asm!("nop");
-            core::arch::asm!("nop");            
-            core::arch::asm!("nop");
-            core::arch::asm!("nop");
-            core::arch::asm!("nop");
             core::arch::asm!("nop");
             pb1.set_high().unwrap();
             core::arch::asm!("nop");
-            core::arch::asm!("nop");
+            pb1.set_low().unwrap();
+
+            pb0.set_low().unwrap();
+            //core::arch::asm!("nop");
+            pb1.set_high().unwrap();
+            pb1.set_low().unwrap();
+            
         }
     }   
     //pb5.set_low().unwrap();
+    //let mut line1 = String::new();
+    println!("Enter the desired frequency :");
+    //let b1 = std::io::stdin().read_line(&mut line1).unwrap();
+    //let b2 = read_line(&mut line1).unwrap();
+    //println!("Hello , you requested for : {} Hz", line1);
+    //println!("no of bytes read , {}", b1);
 
 }
 
